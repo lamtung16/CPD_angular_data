@@ -46,10 +46,16 @@ def opart(signal, Theta, lda):
     C = np.zeros(len(signal) + 1)                               # best cost for each segment from 0 to t
     C[0] = -lda
     tau_star = np.zeros(len(signal) + 1, dtype=int)             # initiate tau_star
+
+    candidates = np.array([0])
     for t in range(1, len(signal) + 1):
-        V = C[:t] + lda + L(np.arange(t), t, cumsum_costs)      # calculate set V
-        C[t] = np.min(V)                                        # update C_i
-        tau_star[t] = np.argmin(V)                              # update tau_star
+        V = C[candidates] + lda + L(candidates, t, cumsum_costs)      # calculate set V
+        best_idx = np.argmin(V)
+        tau_star[t] = candidates[best_idx]
+        C[t] = V[best_idx]
+
+        pruned = candidates[V <= C[t] + 1e-10]
+        candidates = np.append(pruned, t)
 
     chpnts = trace_back(tau_star[1:])                           # get set of changepoints
     signal_mean = get_signal_mean(Theta, cumsum_costs, chpnts)  # get signal means given set of changepoints

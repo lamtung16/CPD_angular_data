@@ -57,20 +57,43 @@ def get_signal_mean(Theta, cumsum_costs, chpnts):
     return mean
 
 
+def prune_candidates(R, C, t, lda, cumsum_costs):
+    s_arr = np.array(R)
+    total_costs = C[s_arr] + L(s_arr + 1, t, cumsum_costs) + lda
+    pruned = s_arr[total_costs <= C[t] + 1e-10]
+    return np.append(pruned, t)
+
+
 # get changpoints and signal_mean by optimal partitiniong
 def opart(signal, Theta, lda):
-    cumsum_costs = get_cumsum(signal, Theta)                    # get cumsum_costs matrix
-    
-    # Get tau_star (list of best last changepoints)
-    C = np.zeros(len(signal) + 1)                               # best cost for each segment from 0 to t
-    C[0] = -lda
-    tau_star = np.zeros(len(signal) + 1, dtype=int)             # initiate tau_star
-    for t in range(1, len(signal) + 1):
-        V = compute_V(C[:t], lda, L(np.arange(t), t, cumsum_costs))
-        tau_star[t] = np.argmin(V)
-        C[t] = V[tau_star[t]]
+    cumsum_costs = get_cumsum(signal, Theta)
 
-    chpnts = trace_back(tau_star[1:])                           # get set of changepoints
-    signal_mean = get_signal_mean(Theta, cumsum_costs, chpnts)  # get signal means given set of changepoints
+    C = np.zeros(len(signal) + 1)
+    C[0] = -lda
+    tau_star = np.zeros(len(signal) + 1, dtype=int)
+
+    candidates = np.array([0])  # candidate changepoints (initially only 0)
+
+    for t in range(1, len(signal) + 1):
+        V = compute_V(C[candidates], lda, L(candidates, t, cumsum_costs))
+        best_idx = np.argmin(V)
+        tau_star[t] = candidates[best_idx]
+        C[t] = V[best_idx]
+
+        # Prune candidates
+        # R_new = []
+        # for s in R:
+        #     if C[s] + L(np.array([s+1]), t, cumsum_costs)[0] + lda <= C[t] + 1e-10:
+        #         R_new.append(s)
+        # R_new.append(t)
+        # R = R_new
+        total_costs = C[candidates] + L(candidates + 1, t, cumsum_costs) + lda
+        pruned = candidates[total_costs <= C[t] + 1e-10]
+        candidates = np.append(pruned, t)
+        print(candidates)
+        # candidates = prune_candidates(candidates, C, t, lda, cumsum_costs)
+
+    chpnts = trace_back(tau_star[1:])
+    signal_mean = get_signal_mean(Theta, cumsum_costs, chpnts)
     chpnts = chpnts[1:-1] - 1
     return chpnts, signal_mean
