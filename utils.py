@@ -54,7 +54,7 @@ def opart(signal, Theta, lda):
         tau_star[t] = candidates[best_idx]
         C[t] = V[best_idx]
 
-        pruned = candidates[V <= C[t] + 1e-10]
+        pruned = candidates[V - lda <= C[t] + 1e-10]
         candidates = np.append(pruned, t)
 
     chpnts = trace_back(tau_star[1:])                           # get set of changepoints
