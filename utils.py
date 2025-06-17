@@ -68,13 +68,46 @@ def pelt(signal, Theta, lda):
     return chpnts, signal_mean
 
 
-def apart(signal, Theta, lda):
-    theta_star = -1.0 * np.ones(shape=(len(signal) + 1, Theta.shape[1]))
-    V = np.zeros(len(signal) + 1)
-    for t in range(1, len(signal) + 1):
-        V_candidates = V[t-1] + geo_d(Theta, signal[t-1]) + lda * np.any(theta_star[t - 1] != Theta, axis=1)
-        best_idx = np.argmin(V_candidates)
-        theta_star[t] = Theta[best_idx]
-        V[t] = V_candidates[best_idx]
-    chpnts = np.arange(len(signal) - 1)[np.any(theta_star[2:] != theta_star[1:-1], axis=1)]
-    return chpnts, theta_star[1:]
+# # Wrong logic but I want to keep it because it's Toby's fault, not mine :)
+# def apart(signal, Theta, lda):
+#     theta_star = -1.0 * np.ones(shape=(len(signal) + 1, Theta.shape[1]))
+#     V = np.zeros(len(signal) + 1)
+#     for t in range(1, len(signal) + 1):
+#         V_candidates = V[t-1] + geo_d(Theta, signal[t-1]) + lda * np.any(theta_star[t - 1] != Theta, axis=1)
+#         best_idx = np.argmin(V_candidates)
+#         theta_star[t] = Theta[best_idx]
+#         V[t] = V_candidates[best_idx]
+#     chpnts = np.arange(len(signal) - 1)[np.any(theta_star[2:] != theta_star[1:-1], axis=1)]
+#     return chpnts, theta_star[1:]
+
+
+def d2(theta, psi):
+    diff = np.abs(psi - theta)
+    return np.sum(np.square(np.minimum(diff, 2*pi - diff)))
+
+
+def apart(y, Theta, lda):
+    T = y.shape[0]                                      # number of samples (length of signal)
+    M = Theta.shape[0]                                  # number of discrete theta (means) or size of Theta
+
+    # Initiation V and s
+    V = np.zeros((T + 1, M))                            # Sum Of Cost Matrix
+    s = -1 * np.ones((T + 1, M), dtype = np.int32)      # State Matrix of best last theta
+
+    # fill up V and s
+    for t in range(1, T + 1):
+        for k in range(M):
+            V_candidates = V[t-1] + lda * np.any(Theta[k] != Theta, axis=1) + d2(Theta[k], y[t-1])
+            best_idx = np.argmin(V_candidates)
+            V[t][k] = V_candidates[best_idx]
+            s[t][k] = best_idx
+
+    # Backtracking from V and s
+    states = np.zeros(T, dtype = np.int32)
+    state = np.argmin(V[T])
+    for t in reversed(range(T)):
+        states[t] = state
+        state = s[t + 1][state]
+    
+    chpnts = np.arange(len(y) - 1)[states[:-1] != states[1:]]                                           # set of changepoints
+    return chpnts, Theta[states]
