@@ -86,28 +86,70 @@ def d2(theta, psi):
     return np.sum(np.square(np.minimum(diff, 2*pi - diff)))
 
 
+# def apart(y, Theta, lda):
+#     T = y.shape[0]                                      # number of samples (length of signal)
+#     M = Theta.shape[0]                                  # number of discrete theta (means) or size of Theta
+
+#     # Initiation V and s
+#     V = np.zeros((T + 1, M))                            # Sum Of Cost Matrix
+#     s = -1 * np.ones((T + 1, M), dtype = np.int32)      # State Matrix of best last theta
+
+#     # fill up V and s
+#     for t in range(1, T + 1):
+#         for k in range(M):
+#             V_candidates = V[t-1] + lda * np.any(Theta[k] != Theta, axis=1) + d2(Theta[k], y[t-1])
+#             best_idx = np.argmin(V_candidates)
+#             V[t][k] = V_candidates[best_idx]
+#             s[t][k] = best_idx
+
+#     # Backtracking from V and s
+#     states = np.zeros(T, dtype = np.int32)
+#     state = np.argmin(V[T])
+#     for t in reversed(range(T)):
+#         states[t] = state
+#         state = s[t + 1][state]
+    
+#     chpnts = np.arange(len(y) - 1)[states[:-1] != states[1:]]                                           # set of changepoints
+#     return chpnts, Theta[states]
+
+
 def apart(y, Theta, lda):
-    T = y.shape[0]                                      # number of samples (length of signal)
-    M = Theta.shape[0]                                  # number of discrete theta (means) or size of Theta
+    T = y.shape[0]
+    M = Theta.shape[0]
 
-    # Initiation V and s
-    V = np.zeros((T + 1, M))                            # Sum Of Cost Matrix
-    s = -1 * np.ones((T + 1, M), dtype = np.int32)      # State Matrix of best last theta
+    V = np.zeros((T + 1, M))                        # best cost upto time t and end with level k
+    tau = -1 * np.ones((T + 1, M), dtype=np.int32)  # best last time t to change if end with level k
+    last_change = -1 * np.ones((T), dtype=np.int32) # best last change location upto time t
 
-    # fill up V and s
+    best_prev = 0
     for t in range(1, T + 1):
         for k in range(M):
-            V_candidates = V[t-1] + lda * np.any(Theta[k] != Theta, axis=1) + d2(Theta[k], y[t-1])
-            best_idx = np.argmin(V_candidates)
-            V[t][k] = V_candidates[best_idx]
-            s[t][k] = best_idx
+            if best_prev + lda < V[t - 1][k]:
+                V[t][k]   = best_prev + lda
+                tau[t][k] = t - 2
+            else:
+                V[t][k]   = V[t - 1][k]
+                tau[t][k] = tau[t - 1][k]
+            
+            V[t][k] = V[t][k] + d2(Theta[k], y[t-1])
 
-    # Backtracking from V and s
-    states = np.zeros(T, dtype = np.int32)
-    state = np.argmin(V[T])
-    for t in reversed(range(T)):
-        states[t] = state
-        state = s[t + 1][state]
+        best_idx = np.argmin(V[t])
+        best_prev = V[t][best_idx]
+        last_change[t-1] = tau[t][best_idx]
     
-    chpnts = np.arange(len(y) - 1)[states[:-1] != states[1:]]                                           # set of changepoints
-    return chpnts, Theta[states]
+    # trace back
+    s = last_change[-1]
+    chpnts = np.array([], dtype=int)
+    while s > 0:
+        chpnts = np.append(s, chpnts)
+        s = last_change[s]
+    
+    # get signal mean
+    ext_chpnts = np.append(np.append(-1, chpnts), T-1)
+    signal_mean = np.zeros_like(y)
+    for i in range(len(ext_chpnts) - 1):
+        start = ext_chpnts[i]
+        end = ext_chpnts[i + 1]
+        signal_mean[start + 1: end + 1] = Theta[np.argmin(V[end + 1])]
+
+    return chpnts, signal_mean
