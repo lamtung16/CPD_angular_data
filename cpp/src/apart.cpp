@@ -63,12 +63,12 @@ std::vector<int> track_back(const std::vector<int> &path_vec)
 }
 
 
-std::vector<int> apart(const arma::mat &signal, const double pen, const int n_states) {
-    int T = signal.n_rows;                                          // signal length
-    arma::mat centroids = init_centroids(signal, n_states);         // init centroids
-    arma::mat V = arma::zeros(T + 1, n_states);                     // sum of cost matrix
-    arma::imat tau = arma::ones<arma::imat>(T + 1, n_states) * -1;  // last change location
-    std::vector<int> path_vec(T, -1);                               // best last change location
+std::vector<int> apart(const arma::mat &signal, const double pen, const int n_states) { //          signal shape (T, D)
+    int T = signal.n_rows;                                          // signal length T
+    arma::mat centroids = init_centroids(signal, n_states);         // init centroids               shape (n_states, D)
+    arma::mat V = arma::zeros(T + 1, n_states);                     // sum of cost matrix           shape (T + 1, n_states)
+    arma::imat tau = arma::ones<arma::imat>(T + 1, n_states) * -1;  // last change location         shape (T + 1, n_states)
+    std::vector<int> path_vec(T, -1);                               // best last change location    shape (T, 1)
 
     double best_prev = 0.0;
     for (int t = 1; t <= T; ++t) {
@@ -92,30 +92,17 @@ std::vector<int> apart(const arma::mat &signal, const double pen, const int n_st
     // Track changepoints
     std::vector<int> changepoints = track_back(path_vec);
 
-    // print to test
-    std::cout << "Input signal:\n" << signal.t() << "\n";
-    std::cout << "penalty: " << pen << "\n\n";
-    std::cout << "n_states: " << n_states << "\n\n";
-    std::cout << "Initialized centroids:\n" << centroids << "\n";
-    std::cout << "Sum of Cost matrix:\n" << V << "\n";
-    std::cout << "Detected changepoints: [";
-    for (int cp : changepoints) {
-        std::cout << cp << ", ";
-    }
-    std::cout << "]";
+    // // print to test
+    // std::cout << "Input signal:\n" << signal.t() << "\n";
+    // std::cout << "penalty: " << pen << "\n\n";
+    // std::cout << "n_states: " << n_states << "\n\n";
+    // std::cout << "Initialized centroids:\n" << centroids << "\n";
+    // std::cout << "Sum of Cost matrix:\n" << V << "\n";
+    // std::cout << "Detected changepoints: [";
+    // for (int cp : changepoints) {
+    //     std::cout << cp << ", ";
+    // }
+    // std::cout << "]";
 
     return changepoints;
-}
-
-
-int main() {
-    // Example data: 10 samples, 1 features
-    arma::mat signal = arma::mat({2, 2, 0.5, 2*pi-0.5, 3.5, 2.5}).t();
-
-    int n_states = 3;
-    double pen = 0.1; // penalty for changing state
-
-    std::vector<int> changes = apart(signal, pen, n_states);
-
-    return 0;
 }
