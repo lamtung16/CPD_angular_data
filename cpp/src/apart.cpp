@@ -6,13 +6,27 @@
 const double pi = 3.14159265358979323846;
 
 
-// squared geodesic (arclength) distance between two angular vectors
+/**
+ * @brief Computes the squared geodesic (arc length) distance between two angular vectors.
+ *
+ * This function calculates the squared distance on a torus between two angular vectors `a` and `b`.
+ * Each element of the vectors is assumed to represent an angle in radians within the range [-π, π).
+ * The function accounts for angular wrap-around, ensuring the shortest arc distance is used.
+ *
+ * The geodesic distance between two angles θ₁ and θ₂ is defined as:
+ *     min(|θ₁ - θ₂|, 2π - |θ₁ - θ₂|)
+ *
+ * The function squares each of these minimal angular differences and returns their sum.
+ *
+ * @param a First angular vector (in radians).
+ * @param b Second angular vector (in radians).
+ * @return Squared geodesic distance between `a` and `b`.
+ */
 double d2(const arma::rowvec& a, const arma::rowvec& b) {
     arma::rowvec diff = arma::abs(a - b);
     arma::rowvec min_diff = arma::min(diff, 2 * pi - diff);
     return arma::accu(arma::square(min_diff));
 }
-
 
 // circular mean for each segment
 arma::rowvec circular_mean(const arma::mat& segment) {
