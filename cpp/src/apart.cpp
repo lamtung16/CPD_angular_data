@@ -6,15 +6,29 @@
 const double pi = 3.14159265358979323846;
 
 
-// squared geodesic (arclength) distance between two angular vectors
-double d2(const arma::rowvec& a, const arma::rowvec& b) {
-    arma::rowvec diff = arma::abs(a - b);
+/**
+ * @brief Computes the squared geodesic distance between two angular vectors.
+ * 
+ * @param vect_a First angular vector (in radians).
+ * @param vect_b Second angular vector (in radians).
+ * @return Squared geodesic distance between two vectors.
+ */
+double sq_geo_dist(const arma::rowvec& vect_a, const arma::rowvec& vect_b) {
+    arma::rowvec diff = arma::abs(vect_a - vect_b);
     arma::rowvec min_diff = arma::min(diff, 2 * pi - diff);
     return arma::accu(arma::square(min_diff));
 }
 
 
-// circular mean for each segment
+/**
+ * @brief Computes the circular mean for each segment.
+ *
+ * This function calculates the circular mean for each dimension of the input segment. 
+ * Angles are wrapped into the [0, 2π) interval.
+ *
+ * @param segment A matrix where each column contains angular values in radians.
+ * @return A row vector containing the circular mean of each dimension.
+ */
 arma::rowvec circular_mean(const arma::mat& segment) {
     arma::rowvec mean_angles(segment.n_cols);
     for (size_t j = 0; j < segment.n_cols; ++j) {
@@ -30,7 +44,18 @@ arma::rowvec circular_mean(const arma::mat& segment) {
 }
 
 
-// initial centroids, getting angular mean for each segment
+/**
+ * @brief Initializes centroids by computing the circular mean for equally divided segments of a signal.
+ *
+ * This function divides the input signal matrix into `n_states` contiguous, equally sized time segments
+ * (along rows) and computes the circular mean of each segment (for each column).
+ *
+ * @param signal A matrix of angular data (in radians), where rows represent time points and columns represent dimensions.
+ * @param n_states Number of segments (or states) to divide the signal into.
+ * @return A matrix with each row is the circular mean of a segment.
+ *
+ * @throws std::invalid_argument if n_states is not positive or exceeds the number of rows in the signal.
+ */
 arma::mat init_centroids(const arma::mat& signal, int n_states) {
     if (n_states <= 0 || signal.n_rows < n_states) {
         throw std::invalid_argument("n_states must be positive and less than or equal to the signal length.");
@@ -50,7 +75,12 @@ arma::mat init_centroids(const arma::mat& signal, int n_states) {
 }
 
 
-// function to track the changepoints from path vector
+/**
+ * @brief Track back changepoints from a path vector (best last changepoint).
+ *
+ * @param path_vec A vector of best last changepoint.
+ * @return A vector of changepoint indices, ordered from start to end.
+ */
 std::vector<int> track_back(const std::vector<int> &path_vec)
 {
     std::vector<int> chpnts;
@@ -63,6 +93,18 @@ std::vector<int> track_back(const std::vector<int> &path_vec)
 }
 
 
+/**
+ * @brief Detects changepoints in an angular signal.
+ *
+ * Detects changepoints for the input angular signal using `n_states` states and a penalty term.
+ *
+ * @param signal Matrix of angular data (T × D), with T time points and D dimensions.
+ * @param pen Penalty parameter to penalize the changepoint presence.
+ * @param n_states Number of states (size of discrete means set).
+ * @return Vector of detected changepoint indices.
+ *
+ * @throws std::invalid_argument if `n_states` is invalid (checked in `init_centroids`).
+ */
 std::vector<int> apart(const arma::mat &signal, const double pen, const int n_states) { //          signal shape (T, D)
     int T = signal.n_rows;                                          // signal length T
     arma::mat centroids = init_centroids(signal, n_states);         // init centroids               shape (n_states, D)
@@ -80,7 +122,7 @@ std::vector<int> apart(const arma::mat &signal, const double pen, const int n_st
                 V(t, k) = best_prev + pen;
                 tau(t, k) = t - 2;
             }
-            V(t, k) += d2(centroids.row(k), signal.row(t - 1));
+            V(t, k) += sq_geo_dist(centroids.row(k), signal.row(t - 1));
             if (V(t, k) < V(t, best_k)) {
                 best_k = k;
             }
@@ -91,18 +133,6 @@ std::vector<int> apart(const arma::mat &signal, const double pen, const int n_st
 
     // Track changepoints
     std::vector<int> changepoints = track_back(path_vec);
-
-    // // print to test
-    // std::cout << "Input signal:\n" << signal.t() << "\n";
-    // std::cout << "penalty: " << pen << "\n\n";
-    // std::cout << "n_states: " << n_states << "\n\n";
-    // std::cout << "Initialized centroids:\n" << centroids << "\n";
-    // std::cout << "Sum of Cost matrix:\n" << V << "\n";
-    // std::cout << "Detected changepoints: [";
-    // for (int cp : changepoints) {
-    //     std::cout << cp << ", ";
-    // }
-    // std::cout << "]";
 
     return changepoints;
 }
