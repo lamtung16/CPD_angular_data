@@ -55,3 +55,9 @@ print(change_points)
 
 Armadillo is added to the project's dependencies as a git submodule in `cpp/ext/armadillo`.
 The submodule is linked to the [Armadillo repo](https://gitlab.com/conradsnicta/armadillo-code) and is pinned to version 14.4.x
+
+**How is the cpp code binded to Python?**
+
+We use [CArma](https://github.com/RUrlus/carma) and [pybind11](https://github.com/pybind/pybind11).
+CArma is added to the project's dependencies as a git submodule in `python/ext/carma`.
+The code is pinned to the `stable` branch.
