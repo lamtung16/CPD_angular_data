@@ -1,4 +1,5 @@
-#include "apart_r.h"
+#include "../cpp/src/apart.h"
+#include <RcppArmadillo.h>
 
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
