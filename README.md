@@ -47,3 +47,11 @@ print(change_points)
 ```bash
 [1] 2 6
 ```
+
+
+## Developer zone
+
+**Which Armadillo version is used?**
+
+Armadillo is added to the project's dependencies as a git submodule in `cpp/ext/armadillo`.
+The submodule is linked to the [Armadillo repo](https://gitlab.com/conradsnicta/armadillo-code) and is pinned to version 14.4.x
