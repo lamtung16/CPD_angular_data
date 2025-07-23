@@ -83,6 +83,7 @@ arma::mat init_centroids(const arma::mat& signal, int n_states) {
 std::vector<int> track_back(const std::vector<int> &path_vec)
 {
     std::vector<int> chpnts;
+    chpnts.insert(chpnts.begin(), static_cast<int>(path_vec.size()));
     int s = path_vec[path_vec.size() - 1];
     while (s >= 0) {
         chpnts.insert(chpnts.begin(), s);
