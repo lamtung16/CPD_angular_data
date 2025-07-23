@@ -1,0 +1,19 @@
+[build-system]
+requires = ["scikit-build-core>=0.10", "pybind11", "numpy"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "ruptures_apart"
+version = "0.1.0"
+description = "Python bindings for APART algorithm using Armadillo and pybind11"
+authors = [{name = "Your Name", email = "your@email.com"}]
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = ["numpy"]
+
+[tool.scikit-build]
+wheel.expand-macos-universal-tags = true
+minimum-version = "build-system.requires"
+
+[tool.scikit-build.cmake.define]
+ARMADILLO_ROOT_DIR = "../cpp/ext/armadillo"

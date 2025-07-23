@@ -2,3 +2,6 @@
 	path = cpp/ext/armadillo
 	url = https://gitlab.com/conradsnicta/armadillo-code
 	branch = 14.4.x
+[submodule "python/ext/carma"]
+	path = python/ext/carma
+	url = https://github.com/RUrlus/carma

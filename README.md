@@ -12,7 +12,32 @@ The program is written in C++, with a user-selectable interface in either Python
 
 ### Installation
 
+First, clone the current repository.
+
+```bash
+git clone https://github.com/lamtung16/apartruptures.git
+cd apartruptures
+```
+
+Then run the following command.
+
+```bash
+python -m pip install python/.
+```
+
 ### Example
+
+```Python
+import numpy as np
+
+from ruptures_apart import apart
+
+signal = np.random.random(size=(100, 3))
+bkps = apart(signal=signal, pen=0.1, n_states=10)
+print(bkps)
+```
+
+
 
 ## R
 
@@ -55,3 +80,9 @@ print(change_points)
 
 Armadillo is added to the project's dependencies as a git submodule in `cpp/ext/armadillo`.
 The submodule is linked to the [Armadillo repo](https://gitlab.com/conradsnicta/armadillo-code) and is pinned to version 14.4.x
+
+**How is the cpp code binded to Python?**
+
+We use [CArma](https://github.com/RUrlus/carma) and [pybind11](https://github.com/pybind/pybind11).
+CArma is added to the project's dependencies as a git submodule in `python/ext/carma`.
+The code is pinned to the `stable` branch.
