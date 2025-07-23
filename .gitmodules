@@ -1,0 +1,4 @@
+[submodule "cpp/ext/armadillo"]
+	path = cpp/ext/armadillo
+	url = https://gitlab.com/conradsnicta/armadillo-code
+	branch = 14.4.x
