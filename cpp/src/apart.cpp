@@ -46,25 +46,25 @@ arma::rowvec circular_mean(const arma::mat& segment) {
 /**
  * @brief Initializes centroids by computing the circular mean for equally divided segments of a signal.
  *
- * This function divides the input signal matrix into `n_states` contiguous, equally sized time segments
+ * This function divides the input signal matrix into `nStates` contiguous, equally sized time segments
  * (along rows) and computes the circular mean of each segment (for each column).
  *
  * @param signal A matrix of angular data (in radians), where rows represent time points and columns represent dimensions.
- * @param n_states Number of segments (or states) to divide the signal into.
+ * @param nStates Number of segments (or states) to divide the signal into.
  * @return A matrix with each row is the circular mean of a segment.
  *
- * @throws std::invalid_argument if n_states is not positive or exceeds the number of rows in the signal.
+ * @throws std::invalid_argument if nStates is not positive or exceeds the number of rows in the signal.
  */
-arma::mat init_centroids(const arma::mat& signal, int n_states) {
-    if (n_states <= 0 || signal.n_rows < n_states) {
-        throw std::invalid_argument("n_states must be positive and less than or equal to the signal length.");
+arma::mat init_centroids(const arma::mat& signal, int nStates) {
+    if (nStates <= 0 || signal.n_rows < nStates) {
+        throw std::invalid_argument("nStates must be positive and less than or equal to the signal length.");
     }
 
-    arma::mat centroids(n_states, signal.n_cols);   // initiation of centroids
+    arma::mat centroids(nStates, signal.n_cols);   // initiation of centroids
 
-    int segment_size = signal.n_rows / n_states;
+    int segment_size = signal.n_rows / nStates;
     int start_idx = 0;
-    for (int i = 0; i < n_states; ++i) {
+    for (int i = 0; i < nStates; ++i) {
         int end_idx = start_idx + segment_size - 1;
         centroids.row(i) = circular_mean(signal.rows(start_idx, end_idx));
         start_idx = end_idx + 1;
@@ -96,26 +96,26 @@ std::vector<int> track_back(const std::vector<int> &path_vec)
 /**
  * @brief Detects changepoints in an angular signal.
  *
- * Detects changepoints for the input angular signal using `n_states` states and a penalty term.
+ * Detects changepoints for the input angular signal using `nStates` states and a penalty term.
  *
  * @param signal Matrix of angular data (T × D), with T time points and D dimensions.
  * @param pen Penalty parameter to penalize the changepoint presence.
- * @param n_states Number of states (size of discrete means set).
+ * @param nStates Number of states (size of discrete means set).
  * @return Vector of detected changepoint indices.
  *
- * @throws std::invalid_argument if `n_states` is invalid (checked in `init_centroids`).
+ * @throws std::invalid_argument if `nStates` is invalid (checked in `init_centroids`).
  */
-std::vector<int> apart(const arma::mat &signal, const double pen, const int n_states) { //          signal shape (T, D)
+std::vector<int> apart(const arma::mat &signal, const double pen, const int nStates) { //          signal shape (T, D)
     int T = signal.n_rows;                                          // signal length T
-    arma::mat centroids = init_centroids(signal, n_states);         // init centroids               shape (n_states, D)
-    arma::mat V = arma::zeros(T + 1, n_states);                     // sum of cost matrix           shape (T + 1, n_states)
-    arma::imat tau = arma::ones<arma::imat>(T + 1, n_states) * -1;  // last change location         shape (T + 1, n_states)
+    arma::mat centroids = init_centroids(signal, nStates);         // init centroids               shape (nStates, D)
+    arma::mat V = arma::zeros(T + 1, nStates);                     // sum of cost matrix           shape (T + 1, nStates)
+    arma::imat tau = arma::ones<arma::imat>(T + 1, nStates) * -1;  // last change location         shape (T + 1, nStates)
     std::vector<int> path_vec(T, -1);                               // best last change location    shape (T, 1)
 
     double best_prev = 0.0;
     for (int t = 1; t <= T; ++t) {
         int best_k = 0;
-        for (int k = 0; k < n_states; ++k) {
+        for (int k = 0; k < nStates; ++k) {
             V(t, k) = V(t - 1, k);
             tau(t, k) = tau(t - 1, k);
             if (best_prev + pen < V(t - 1, k)) {
