@@ -1,0 +1,3 @@
+useDynLib(apartruptures, .registration = TRUE)
+import(Rcpp)
+export(apart_rcpp)

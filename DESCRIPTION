@@ -1,0 +1,13 @@
+Package: apartruptures
+Type: Package
+Title: APart Ruptures
+Version: 0.1.0
+Author: Tung Nguyen
+Maintainer: Tung Nguyen <nguyenlamtung10@gmail.com>
+Description: Change point detection using dynamic programming.
+License: MIT
+Encoding: UTF-8
+RoxygenNote: 7.3.1
+LinkingTo: Rcpp, RcppArmadillo
+Imports: Rcpp
+SystemRequirements: C++11
