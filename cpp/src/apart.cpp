@@ -86,7 +86,7 @@ std::vector<int> track_back(const std::vector<int> &path_vec)
     chpnts.insert(chpnts.begin(), static_cast<int>(path_vec.size()));
     int s = path_vec[path_vec.size() - 1];
     while (s >= 0) {
-        chpnts.insert(chpnts.begin(), s);
+        chpnts.insert(chpnts.begin(), s + 1);
         s = path_vec[s];
     }
     return chpnts;
