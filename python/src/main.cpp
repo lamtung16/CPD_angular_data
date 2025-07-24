@@ -11,8 +11,8 @@ PYBIND11_MODULE(_core, m)
 {
     m.def("apart",
           &apart,
-          "Apply APART algorithm for change point detection (VAR model)",
+          "Apply APART algorithm for change point detection",
           py::arg("signal"),
           py::arg("pen") = 1.0,
-          py::arg("n_states") = 1);
+          py::arg("nStates") = 1);
 }
