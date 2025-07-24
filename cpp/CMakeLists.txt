@@ -22,4 +22,4 @@ add_library(ruptures_apart_cpp STATIC ${CPP_SOURCES})
 target_include_directories(ruptures_apart_cpp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ext/armadillo/include)
 
 # Link dependencies
-target_link_libraries(ruptures_apart_cpp PUBLIC armadillo)
+target_link_libraries(ruptures_apart_cpp PUBLIC ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES} armadillo)
