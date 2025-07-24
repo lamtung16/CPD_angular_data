@@ -33,7 +33,7 @@ import numpy as np
 from ruptures_apart import apart
 
 signal = np.random.random(size=(100, 3))
-bkps = apart(signal=signal, pen=0.1, n_states=10)
+bkps = apart(signal=signal, pen=0.3, nStates=10)
 print(bkps)
 ```
 
