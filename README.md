@@ -15,7 +15,7 @@ The program is written in C++, with a user-selectable interface in either Python
 First, clone the current repository.
 
 ```bash
-git clone https://github.com/lamtung16/apartruptures.git
+git clone --recurse-submodules https://github.com/lamtung16/apartruptures.git
 cd apartruptures
 ```
 
@@ -24,6 +24,8 @@ Then run the following command.
 ```bash
 python -m pip install python/.
 ```
+
+(Don't forget the trailing `/.`.)
 
 ### Example
 
