@@ -64,6 +64,12 @@ bkps <- apart_rcpp(signal, penalty, num_states)
 print(bkps)
 ```
 
+## Analysis figures
+![pen](notebooks/figs/penalty_analysis.png)
+---
+![nstates](notebooks/figs/nstates_analysis.png)
+---
+![runtime](notebooks/figs/runtime_analysis.png)
 
 ## Developer zone
 
