@@ -3,7 +3,7 @@
 
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
-Rcpp::IntegerVector apart_rcpp(const arma::mat& signal, double pen, int n_states) {
-    std::vector<int> chpnts = apart(signal, pen, n_states);
+Rcpp::IntegerVector apart_rcpp(const arma::mat& signal, double pen, int nStates) {
+    std::vector<int> chpnts = apart(signal, pen, nStates);
     return Rcpp::wrap(chpnts);
 }
